@@ -3,28 +3,29 @@ import { View, Text } from 'react-native';
 import axios from 'axios';
 import { Button, Card, CardSection, Input } from './common';
 
-class LoginForm extends Component {
-  static navigationOptions = {
-    title: 'Login'
-  }
-  constructor() {
+class RegistrationForm extends Component {
+  static navigationOptions = ({ navigation }) => ({
+    // getButts(navigation.state.params.butts),
+    title: 'Register',
+  });
+
+  constructor(props) {
     super();
     this.state = {
+      username: '',
       email: '',
-      passsword: '',
+      password: '',
       errors: [],
     };
-
     this.onButtonPress = this.onButtonPress.bind(this);
   }
 
   onButtonPress() {
-    const { email, password } = this.state;
+    const { username, email, password } = this.state;
     const { navigate } = this.props.navigation;
 
-    axios.post('https://shrouded-plateau-80705.herokuapp.com/api/login', { email, password })
+    axios.post('https://shrouded-plateau-80705.herokuapp.com/api/users', { username, email, password })
       .then(response => {
-        console.log(response);
         if (response.data.status === 'SUCCESS') {
           navigate('Map', { accessToken: response.data.accessToken });
         } else {
@@ -35,12 +36,18 @@ class LoginForm extends Component {
   }
 
   render() {
-    const { navigate } = this.props.navigation;
-
-
     return (
       <View>
         <Card>
+          <CardSection>
+            <Input
+            placeholder="username"
+            label="Username"
+            value={this.state.username}
+            onChangeText={username => this.setState({ username })}
+            />
+          </CardSection>
+
           <CardSection>
             <Input
             placeholder="user@email.com"
@@ -68,28 +75,15 @@ class LoginForm extends Component {
 
           <CardSection>
             <Button onPress={this.onButtonPress}>
-              Login
+              Register
             </Button>
-          </CardSection>
 
-          <CardSection>
-            <Button onPress={() => navigate('Register')}>
-              Register now
-            </Button>
           </CardSection>
-
-          <CardSection>
-            <Button onPress={() => navigate('Map', { accessToken: '' })}>
-              Continue as a guest
-            </Button>
-          </CardSection>
-
         </Card>
       </View>
     );
   }
 }
-
 
 const styles = {
   errorTextStyle: {
@@ -99,4 +93,4 @@ const styles = {
   }
 };
 
-export default LoginForm;
+export default RegistrationForm;
