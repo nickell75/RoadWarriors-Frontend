@@ -1,8 +1,10 @@
 import { StackNavigator } from 'react-navigation';
 import MapScreen from './components/MapScreen';
+import LoginForm from './components/LoginForm';
 
 const App = StackNavigator({
-  Map: { screen: MapScreen },
+  Login: { screen: LoginForm },
+  Map: { screen: MapScreen }
 });
 
 export default App;
