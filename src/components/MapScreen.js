@@ -102,8 +102,7 @@ class ReactMaps extends Component {
           <MapView.Marker
             coordinate={this.state.markerPosition}>
             <View style={styles.radius}>
-              <View style={styles.marker}>
-              </View>
+              <View style={styles.marker} />
             </View>
           </MapView.Marker>
         </MapView>
