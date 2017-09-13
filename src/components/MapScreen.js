@@ -3,11 +3,12 @@ import {
   StyleSheet,
   View,
   Dimensions,
-  Text
+  Keyboard,
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
+import YelpMarkers from './common/yelpMarkers';
 
 
 const { width, height } = Dimensions.get('window');
@@ -33,6 +34,7 @@ class ReactMaps extends Component {
         longitude: 0
       },
       destination: '',
+      yelpMarkers: [],
     };
   }
 
@@ -70,11 +72,25 @@ class ReactMaps extends Component {
       this.setState({ initialPosition: lastRegion });
       this.setState({ markerPosition: lastRegion });
     });
+    
   }
 
   componentWillUnmount() {
-  navigator.geolocation.clearWatch(this.watchID)
+    navigator.geolocation.clearWatch(this.watchID)
+    
   }
+
+  getDirections() {
+    axios({
+      method: 'get',
+      url: 'https://api.yelp.com/v3/businesses/search?location=${this.state.destination}',
+      headers: {'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx'} 
+    }).then(
+      response => console.log(response)
+    );
+
+  }
+
 
   render() {
     return (
@@ -89,7 +105,8 @@ class ReactMaps extends Component {
               showsMyLocationButton
               showsTraffic
               zoomEnabled
-              scrollEnabled>
+              scrollEnabled
+            >
 
               <MapView.Marker
                 coordinate={this.state.markerPosition}>
@@ -97,6 +114,7 @@ class ReactMaps extends Component {
                   <View style={styles.marker} />
                 </View>
               </MapView.Marker>
+
               <Card>
                 <CardSection>
                   <Input
@@ -107,11 +125,14 @@ class ReactMaps extends Component {
                 </CardSection>
 
                 <CardSection>
-                  <Button >
-                    Go Noob
+                  <Button onPress={this.getDirections}>
+                    Go Noob!
                   </Button>
                 </CardSection>
               </Card>
+
+              <YelpMarkers yelpMarkers={this.state.yelpMarkers}/>
+              
             </MapView>
         </View>
     );
@@ -138,6 +159,9 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
+  button: {
+
+  }
 });
 
 export default ReactMaps;
