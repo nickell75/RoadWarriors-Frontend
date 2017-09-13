@@ -8,7 +8,7 @@ import {
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
-import YelpMarkers from './common/yelpMarkers';
+import restaurantImg from './imgs/restaurantgourmet.png';
 
 
 const { width, height } = Dimensions.get('window');
@@ -35,6 +35,7 @@ class ReactMaps extends Component {
       },
       destination: '',
       yelpMarkers: [],
+      gasMarkers: [],
     };
   }
 
@@ -103,7 +104,7 @@ class ReactMaps extends Component {
               showsUserLocation
               followsUserLocation
               showsMyLocationButton
-              showsTraffic
+              
               zoomEnabled
               scrollEnabled
             >
@@ -116,8 +117,33 @@ class ReactMaps extends Component {
                 </View>
               </MapView.Marker>
 
-            <YelpMarkers yelpMarkers={this.state.yelpMarkers} />
+              
+              {this.state.yelpMarkers.map((marker, index) => {
+                return (
+                  <MapView.Marker
+                    key={index}
+                    image={restaurantImg}
+                    coordinate={{
+                        latitude: marker.coordinates.latitude,
+                        longitude: marker.coordinates.longitude,
+                    }}
+                  />
+                );
+              })}
 
+              {this.state.gasMarkers.map((marker, index) => {
+                return (
+                  <MapView.Marker
+                    key={index}
+                    image={restaurantImg}
+                    coordinate={{
+                        latitude: marker.coordinates.latitude,
+                        longitude: marker.coordinates.longitude,
+                    }}
+                  />
+                );
+              })}
+            
               <Card>
                 <CardSection>
                   <Input
