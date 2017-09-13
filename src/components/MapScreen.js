@@ -1,43 +1,75 @@
 import React, { Component } from 'react';
 import {
   StyleSheet,
-  View
+  View,
+  Dimensions
 } from 'react-native';
-
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+
+const { width, height } = Dimensions.get('window');
+const ASPECT_RATIO = width / height;
+const LATITUDE = 37.78825;
+const LONGITUDE = -122.4324;
+const LATITUDE_DELTA = 0.0922;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 class ReactMaps extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      coords: []
+      initialPosition: {
+        latitude: 0,
+        longitude: 0,
+        latitudeDelta: 0,
+        longitudeDelta: 0
+      },
+      markerPosition: {
+        latitude: 0,
+        longitude: 0
+      }
     };
   }
 
+  watchID: ?number = null
+
   componentDidMount() {
-    // find your origin and destination point coordinates and pass it to our method.
-    // I am using Bursa,TR -> Istanbul,TR for this example
-    this.getDirections("40.1884979, 29.061018", "41.0082,28.9784")
+    navigator.geolocation.getCurrentPosition((position) => {
+      let lat = parseFloat(position.coords.latitude);
+      let long = parseFloat(position.coords.longitude);
+
+      let initialRegion = {
+        latitude: lat,
+        longitude: long,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA
+      };
+
+      this.setState({ initialPosition: initialRegion });
+      this.setState({ markerPosition: initialRegion });
+    },
+    (error) => alert(JSON.stringify(error)),
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 });
+
+    this.watchID = navigator.geolocation.watchPosition((position) => {
+      let lat = parseFloat(position.coords.latitude);
+      let long = parseFloat(position.coords.longitude);
+
+      let lastRegion = {
+        latitude: lat,
+        longitude: long,
+        longitudeDelta: LONGITUDE_DELTA,
+        latitudeDelta: LATITUDE_DELTA
+      };
+
+      this.setState({ initialPosition: lastRegion });
+      this.setState({ markerPosition: lastRegion });
+    });
   }
-   async getDirections(startLoc, destinationLoc) {
-    try {
-        let resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${ startLoc }&destination=${ destinationLoc }`)
-        let respJson = await resp.json();
-        let points = Polyline.decode(respJson.routes[0].overview_polyline.points);
-        let coords = points.map((point, index) => {
-            return  {
-                latitude: 37.78825,
-                longitude: -122.4324,
-                latitudeDelta: 0.015,
-                longitudeDelta: 0.0121,
-            }
-        })
-        this.setState({coords: coords})
-        return coords
-    } catch(error) {
-        return error
-    }
-}
+
+  componentWillUnmount() {
+  navigator.geolocation.clearWatch(this.watchID)
+  }
 
   render() {
     return (
@@ -46,21 +78,22 @@ class ReactMaps extends Component {
         <MapView
           provider={PROVIDER_GOOGLE}
           style={styles.map}
-          zoomEnabled={true}
+          initialRegion={this.state.initialPosition}
+          showsUserLocation={true}
+          followsUserLocation={true}
+          showsMyLocationButton
+          showsTraffic
+          zoomEnabled
+          scrollEnabled>
 
-          initialRegion={{
-            latitude: 137.78825,
-            longitude: -122.4324,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
-          }}
-          />
-
-          <MapView.Polyline
-            coordinates={this.state.coords}
-            strokeWidth={2}
-            strokeColor="red"/>
-
+          <MapView.Marker
+            coordinate={this.state.markerPosition}>
+            <View style={styles.radius}>
+              <View style={styles.marker}>
+              </View>
+            </View>
+          </MapView.Marker>
+        </MapView>
       </View>
     );
   }
@@ -73,6 +106,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
   welcome: {
     fontSize: 20,
     textAlign: 'center',
@@ -82,9 +118,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     marginBottom: 5,
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
   },
 });
 
