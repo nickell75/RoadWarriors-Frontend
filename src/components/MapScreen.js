@@ -3,11 +3,12 @@ import {
   StyleSheet,
   View,
   Dimensions,
-  Text
+  Keyboard,
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
+import YelpMarkers from './common/yelpMarkers';
 
 
 const { width, height } = Dimensions.get('window');
@@ -33,10 +34,9 @@ class ReactMaps extends Component {
         longitude: 0
       },
       destination: '',
+      yelpMarkers: [],
     };
   }
-
-  watchID: ?number = null
 
   componentDidMount() {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -54,7 +54,7 @@ class ReactMaps extends Component {
       this.setState({ markerPosition: initialRegion });
     },
     (error) => alert(JSON.stringify(error)),
-    { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 });
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 })
 
     this.watchID = navigator.geolocation.watchPosition((position) => {
       let lat = parseFloat(position.coords.latitude);
@@ -66,15 +66,31 @@ class ReactMaps extends Component {
         longitudeDelta: LONGITUDE_DELTA,
         latitudeDelta: LATITUDE_DELTA
       };
-
       this.setState({ initialPosition: lastRegion });
       this.setState({ markerPosition: lastRegion });
-    });
+      
+      axios({
+        method: 'get',
+        url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=1600&limit=20`,
+        headers: {'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx'} 
+      }).then(response => 
+        this.setState({ yelpMarkers: response.data.businesses })
+      ).catch(response => {
+        alert(response)
+        console.log('ohhhh shit')
+      });
+    })
   }
 
   componentWillUnmount() {
-  navigator.geolocation.clearWatch(this.watchID)
+    navigator.geolocation.clearWatch(this.watchID)  
   }
+
+  getDirections() {
+  
+  }
+
+  watchID: ?number = null
 
   render() {
     return (
@@ -84,19 +100,22 @@ class ReactMaps extends Component {
               provider={PROVIDER_GOOGLE}
               style={styles.map}
               initialRegion={this.state.initialPosition}
-              showsUserLocation={true}
-              followsUserLocation={true}
+              showsUserLocation
+              followsUserLocation
               showsMyLocationButton
               showsTraffic
               zoomEnabled
-              scrollEnabled>
+              scrollEnabled
+            >
 
               <MapView.Marker
-                coordinate={this.state.markerPosition}>
+                coordinate={this.state.markerPosition}
+              >
                 <View style={styles.radius}>
                   <View style={styles.marker} />
                 </View>
               </MapView.Marker>
+
               <Card>
                 <CardSection>
                   <Input
@@ -107,11 +126,14 @@ class ReactMaps extends Component {
                 </CardSection>
 
                 <CardSection>
-                  <Button >
-                    Go Noob
+                  <Button onPress={this.getDirections}>
+                    Go Noob!
                   </Button>
                 </CardSection>
               </Card>
+
+              <YelpMarkers yelpMarkers={this.state.yelpMarkers} />
+              
             </MapView>
         </View>
     );
@@ -138,6 +160,9 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
+  button: {
+
+  }
 });
 
 export default ReactMaps;
