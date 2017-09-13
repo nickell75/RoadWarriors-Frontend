@@ -71,19 +71,19 @@ class ReactMaps extends Component {
       
       axios({
         method: 'get',
-        url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=1600&limit=20`,
-        headers: {'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx'} 
-      }).then(response => 
-        this.setState({ yelpMarkers: response.data.businesses })
-      ).catch(response => {
-        alert(response)
-        console.log('ohhhh shit')
+        url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=1600&limit=4`,
+        headers: { 'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx'} 
+      }).then(response => { 
+        this.setState({ yelpMarkers: response.data.businesses });
+        // console.log(response.data);
+      }).catch(response => {
+        console.log(response);
       });
-    })
+    });
   }
 
   componentWillUnmount() {
-    navigator.geolocation.clearWatch(this.watchID)  
+    navigator.geolocation.clearWatch(this.watchID); 
   }
 
   getDirections() {
@@ -116,6 +116,8 @@ class ReactMaps extends Component {
                 </View>
               </MapView.Marker>
 
+            <YelpMarkers yelpMarkers={this.state.yelpMarkers} />
+
               <Card>
                 <CardSection>
                   <Input
@@ -132,9 +134,8 @@ class ReactMaps extends Component {
                 </CardSection>
               </Card>
 
-              <YelpMarkers yelpMarkers={this.state.yelpMarkers} />
-              
             </MapView>
+            
         </View>
     );
   }
