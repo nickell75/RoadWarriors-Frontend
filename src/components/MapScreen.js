@@ -85,12 +85,11 @@ class ReactMaps extends Component {
       method: 'get',
       url: 'https://api.yelp.com/v3/businesses/search?location=${this.state.destination}',
       headers: {'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx'} 
-    }).then(
-      response => console.log(response)
+    }).then(response => 
+      this.setState({ yelpMarkers: response.data.businesses }),
+      console.log(this.state.yelpMarkers)
     );
-
   }
-
 
   render() {
     return (
