@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button, Card, CardSection, Input } from './common';
+import axios from 'axios';
 
 
 const { width, height } = Dimensions.get('window');
@@ -31,7 +32,7 @@ class ReactMaps extends Component {
         latitude: 0,
         longitude: 0
       },
-      destination: ''
+      destination: '',
     };
   }
 
@@ -77,36 +78,42 @@ class ReactMaps extends Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <Card>
-          <CardSection>
-            <Input
-            placeholder="Where to?"
-            label="destination"
-            value={this.state.email}
-            onChangeText={email => this.setState({ email })}
-            />
-          </CardSection>
-        </Card>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          initialRegion={this.state.initialPosition}
-          showsUserLocation={true}
-          followsUserLocation={true}
-          showsMyLocationButton
-          showsTraffic
-          zoomEnabled
-          scrollEnabled>
+      
+        <View style={styles.container}>
+            <MapView
+              provider={PROVIDER_GOOGLE}
+              style={styles.map}
+              initialRegion={this.state.initialPosition}
+              showsUserLocation={true}
+              followsUserLocation={true}
+              showsMyLocationButton
+              showsTraffic
+              zoomEnabled
+              scrollEnabled>
 
-          <MapView.Marker
-            coordinate={this.state.markerPosition}>
-            <View style={styles.radius}>
-              <View style={styles.marker} />
-            </View>
-          </MapView.Marker>
-        </MapView>
-      </View>
+              <MapView.Marker
+                coordinate={this.state.markerPosition}>
+                <View style={styles.radius}>
+                  <View style={styles.marker} />
+                </View>
+              </MapView.Marker>
+              <Card>
+                <CardSection>
+                  <Input
+                  placeholder="Where to?"
+                  value={this.state.destination}
+                  onChangeText={destination => this.setState({ destination })}
+                  />
+                </CardSection>
+
+                <CardSection>
+                  <Button >
+                    Go Noob
+                  </Button>
+                </CardSection>
+              </Card>
+            </MapView>
+        </View>
     );
   }
 }
