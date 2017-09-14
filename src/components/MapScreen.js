@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
   View,
   Dimensions,
   Text
@@ -87,7 +86,7 @@ class ReactMaps extends Component {
         .catch(response => 
           console.log(response)
         );
-    });
+      });
   }
 
   componentWillUnmount() {
@@ -200,26 +199,5 @@ class ReactMaps extends Component {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
-
+const styles = require('./common/StyleSheet.js');
 export default ReactMaps;
