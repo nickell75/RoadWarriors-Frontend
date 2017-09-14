@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {
-  StyleSheet,
   View,
   Dimensions,
 } from 'react-native';
@@ -25,8 +24,8 @@ class ReactMaps extends Component {
 
     this.state = {
       initialPosition: {
-        latitude: 0,
-        longitude: 0,
+        latitude: 37.784517,
+        longitude: -122.397194,
         latitudeDelta: 0,
         longitudeDelta: 0
       },
@@ -90,7 +89,7 @@ class ReactMaps extends Component {
         .catch(response =>
           console.log(response)
         );
-    });
+      });
   }
 
   componentWillUnmount() {
@@ -232,7 +231,5 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 });
-
-
 
 export default ReactMaps;
