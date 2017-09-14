@@ -9,6 +9,7 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
 import restaurantImg from './imgs/restaurantgourmet.png';
+import gasImg from './imgs/gazstation.png';
 
 
 const { width, height } = Dimensions.get('window');
@@ -69,28 +70,20 @@ class ReactMaps extends Component {
       };
       this.setState({ initialPosition: lastRegion });
       this.setState({ markerPosition: lastRegion });
-    // Yelp API call
-      axios({
-        method: 'get',
-        url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=1600&limit=4`,
-        headers: { 'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx'} 
-      }).then(response => { 
-        this.setState({ yelpMarkers: response.data.businesses });
-        // console.log(response.data);
-      }).catch(response => {
-        console.log(response);
-      });
-    // 
-      axios({
-        method: 'get',
-        url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=1600&limit=4`,
-        headers: { 'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx'} 
-      }).then(response => { 
-        this.setState({ yelpMarkers: response.data.businesses });
-        // console.log(response.data);
-      }).catch(response => {
-        console.log(response);
-      });
+
+      axios.all([
+        axios({ method: 'get', url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=8500`, headers: { 'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx' } }).catch(response => { console.log(response); }), 
+        axios({ method: 'get', url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=37.78825,-122.4324&radius=8500&type=gas_station&key=AIzaSyCd4XV6oELQ949KGvp7-ODsqlyjgzQ4_KU` }).catch(response => { console.log(response); })
+        ])
+        .then(axios.spread((yelpData, gasData) => {
+          this.setState({
+            yelpMarkers: yelpData.data.businesses,
+            gasMarkers: gasData.data.results
+          });
+        }))
+        .catch(response => 
+          console.log(response)
+        );
     });
   }
 
@@ -128,7 +121,6 @@ class ReactMaps extends Component {
                 </View>
               </MapView.Marker>
 
-              
               {this.state.yelpMarkers.map((marker, index) => {
                 return (
                   <MapView.Marker
@@ -146,14 +138,15 @@ class ReactMaps extends Component {
                 return (
                   <MapView.Marker
                     key={index}
-                    image={restaurantImg}
+                    image={gasImg}
                     coordinate={{
-                        latitude: marker.coordinates.latitude,
-                        longitude: marker.coordinates.longitude,
+                        latitude: marker.geometry.location.lat,
+                        longitude: marker.geometry.location.lng,
                     }}
                   />
                 );
               })}
+
             
               <Card>
                 <CardSection>
