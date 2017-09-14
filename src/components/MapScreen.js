@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {
   View,
   Dimensions,
+  StyleSheet
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
