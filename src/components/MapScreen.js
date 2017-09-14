@@ -3,18 +3,16 @@ import {
   StyleSheet,
   View,
   Dimensions,
-  Keyboard,
+  Text
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
-import YelpMarkers from './common/yelpMarkers';
 
+import Polyline from '@mapbox/polyline';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
-const LATITUDE = 37.78825;
-const LONGITUDE = -122.4324;
 const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
@@ -33,12 +31,15 @@ class ReactMaps extends Component {
         latitude: 0,
         longitude: 0
       },
-      destination: '',
-      yelpMarkers: [],
+      destinationLoc: '',
+      coords: []
     };
   }
 
+  watchID: ?number = null
+
   componentDidMount() {
+    console.log(this.state.destinationLoc);
     navigator.geolocation.getCurrentPosition((position) => {
       let lat = parseFloat(position.coords.latitude);
       let long = parseFloat(position.coords.longitude);
@@ -49,12 +50,12 @@ class ReactMaps extends Component {
         latitudeDelta: LATITUDE_DELTA,
         longitudeDelta: LONGITUDE_DELTA
       };
-
       this.setState({ initialPosition: initialRegion });
       this.setState({ markerPosition: initialRegion });
+
     },
     (error) => alert(JSON.stringify(error)),
-    { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 })
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 });
 
     this.watchID = navigator.geolocation.watchPosition((position) => {
       let lat = parseFloat(position.coords.latitude);
@@ -66,76 +67,90 @@ class ReactMaps extends Component {
         longitudeDelta: LONGITUDE_DELTA,
         latitudeDelta: LATITUDE_DELTA
       };
+
       this.setState({ initialPosition: lastRegion });
       this.setState({ markerPosition: lastRegion });
-      
-      axios({
-        method: 'get',
-        url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=1600&limit=20`,
-        headers: {'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx'} 
-      }).then(response => 
-        this.setState({ yelpMarkers: response.data.businesses })
-      ).catch(response => {
-        alert(response)
-        console.log('ohhhh shit')
-      });
-    })
+    });
   }
 
   componentWillUnmount() {
-    navigator.geolocation.clearWatch(this.watchID)  
+  navigator.geolocation.clearWatch(this.watchID)
+  }
+
+  destinationParser(destination) {
+    return destination.split(" ").join('+');
   }
 
   getDirections() {
-  
-  }
+    const {markerPosition, destinationLoc } = this.state;
+    const origin_latitude = this.state.markerPosition.latitude
+    const origin_longitude = this.state.markerPosition.longitude
+    const origin_position = `${origin_latitude},${origin_longitude}`;
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyBEBRwbyIwxo23O6gXSQOnjAXmi8ahzxpU`
 
-  watchID: ?number = null
+    axios.post(url).then(response => {
+      console.log(response);
+    let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
+    let coords = points.map((point) => {
+      return  {
+          latitude : point[0],
+          longitude : point[1]
+        }
+      })
+    this.setState({coords: coords})
+        return coords
+      }).catch(error => {
+          alert(error)
+          return error
+        });
+}
 
   render() {
     return (
-      
-        <View style={styles.container}>
-            <MapView
-              provider={PROVIDER_GOOGLE}
-              style={styles.map}
-              initialRegion={this.state.initialPosition}
-              showsUserLocation
-              followsUserLocation
-              showsMyLocationButton
-              showsTraffic
-              zoomEnabled
-              scrollEnabled
-            >
 
-              <MapView.Marker
-                coordinate={this.state.markerPosition}
-              >
-                <View style={styles.radius}>
-                  <View style={styles.marker} />
-                </View>
-              </MapView.Marker>
+      <View style={styles.container}>
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          initialRegion={this.state.initialPosition}
+          finalRegion={this.state.destinationLoc}
+          showsUserLocation={true}
+          followsUserLocation={true}
+          showsMyLocationButton
+          showsTraffic
+          zoomEnabled
+          scrollEnabled>
 
-              <Card>
-                <CardSection>
-                  <Input
-                  placeholder="Where to?"
-                  value={this.state.destination}
-                  onChangeText={destination => this.setState({ destination })}
-                  />
-                </CardSection>
+        <MapView.Marker
+          coordinate={this.state.markerPosition}>
+          <View style={styles.radius}>
+            <View style={styles.marker} />
+          </View>
+        </MapView.Marker>
 
-                <CardSection>
-                  <Button onPress={this.getDirections}>
-                    Go Noob!
-                  </Button>
-                </CardSection>
-              </Card>
+        <MapView.Polyline
+            coordinates={this.state.coords}
+            strokeWidth={8}
+            strokeColor="blue"
+        />
 
-              <YelpMarkers yelpMarkers={this.state.yelpMarkers} />
-              
-            </MapView>
-        </View>
+        <Card>
+          <CardSection>
+            <Input
+              placeholder="Where to?"
+              value={this.state.destinationLoc}
+              onChangeText={destinationLoc => this.setState({ destinationLoc })}
+            />
+          </CardSection>
+
+          <CardSection>
+            <Button onPress={this.getDirections.bind(this)}>
+              Fuck you Mark!!!
+            </Button>
+          </CardSection>
+        </Card>
+      </MapView>
+    </View>
     );
   }
 }
@@ -160,9 +175,6 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
-  button: {
-
-  }
 });
 
 export default ReactMaps;
