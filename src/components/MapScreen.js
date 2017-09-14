@@ -8,7 +8,8 @@ import {
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
-
+import restaurantImg from './imgs/restaurantgourmet.png';
+import gasImg from './imgs/gazstation.png';
 import Polyline from '@mapbox/polyline';
 
 const { width, height } = Dimensions.get('window');
@@ -31,6 +32,8 @@ class ReactMaps extends Component {
         latitude: 0,
         longitude: 0
       },
+      yelpMarkers: [],
+      gasMarkers: [],
       destinationLoc: '',
       coords: []
     };
@@ -70,11 +73,25 @@ class ReactMaps extends Component {
 
       this.setState({ initialPosition: lastRegion });
       this.setState({ markerPosition: lastRegion });
+
+      axios.all([
+        axios({ method: 'get', url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=8500`, headers: { 'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx' } }).catch(response => { console.log(response); }), 
+        axios({ method: 'get', url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=37.78825,-122.4324&radius=8500&type=gas_station&key=AIzaSyCd4XV6oELQ949KGvp7-ODsqlyjgzQ4_KU` }).catch(response => { console.log(response); })
+        ])
+        .then(axios.spread((yelpData, gasData) => {
+          this.setState({
+            yelpMarkers: yelpData.data.businesses,
+            gasMarkers: gasData.data.results
+          });
+        }))
+        .catch(response => 
+          console.log(response)
+        );
     });
   }
 
   componentWillUnmount() {
-  navigator.geolocation.clearWatch(this.watchID)
+    navigator.geolocation.clearWatch(this.watchID); 
   }
 
   destinationParser(destination) {
@@ -107,7 +124,7 @@ class ReactMaps extends Component {
 
   render() {
     return (
-
+  
       <View style={styles.container}>
         <MapView
           provider={PROVIDER_GOOGLE}
@@ -133,6 +150,32 @@ class ReactMaps extends Component {
             strokeWidth={8}
             strokeColor="blue"
         />
+        
+        {this.state.yelpMarkers.map((marker, index) => {
+            return (
+               <MapView.Marker
+                  key={index}
+                  image={restaurantImg}
+                  coordinate={{
+                     latitude: marker.coordinates.latitude,
+                     longitude: marker.coordinates.longitude,
+                  }}
+                />
+             );
+         })}
+
+        {this.state.gasMarkers.map((marker, index) => {
+          return (
+            <MapView.Marker
+              key={index}
+              image={gasImg}
+              coordinate={{
+                  latitude: marker.geometry.location.lat,
+                  longitude: marker.geometry.location.lng,
+              }}
+            />
+          );
+        })}
 
         <Card>
           <CardSection>
@@ -145,10 +188,12 @@ class ReactMaps extends Component {
 
           <CardSection>
             <Button onPress={this.getDirections.bind(this)}>
-              Fuck you Mark!!!
+              Duck you Google!!!
             </Button>
           </CardSection>
+
         </Card>
+
       </MapView>
     </View>
     );
