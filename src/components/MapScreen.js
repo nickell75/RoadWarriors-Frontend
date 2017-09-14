@@ -3,14 +3,14 @@ import {
   StyleSheet,
   View,
   Dimensions,
-  Text
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
+import Polyline from '@mapbox/polyline';
+import { Button, CardSection, Input } from './common';
 import restaurantImg from './imgs/restaurantgourmet.png';
 import gasImg from './imgs/gazstation.png';
-import Polyline from '@mapbox/polyline';
+import SearchBox from './SearchBox';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -55,7 +55,6 @@ class ReactMaps extends Component {
       };
       this.setState({ initialPosition: initialRegion });
       this.setState({ markerPosition: initialRegion });
-
     },
     (error) => alert(JSON.stringify(error)),
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 });
@@ -176,8 +175,9 @@ class ReactMaps extends Component {
             />
           );
         })}
+      </MapView>
 
-        <Card>
+      <SearchBox>
           <CardSection>
             <Input
               placeholder="Where to?"
@@ -185,16 +185,12 @@ class ReactMaps extends Component {
               onChangeText={destinationLoc => this.setState({ destinationLoc })}
             />
           </CardSection>
-
           <CardSection>
-            <Button onPress={this.getDirections.bind(this)}>
-              Duck you Google!!!
+            <Button onPress={() => this.getDirections.bind(this)}>
+              Go
             </Button>
           </CardSection>
-
-        </Card>
-
-      </MapView>
+        </SearchBox>
     </View>
     );
   }
