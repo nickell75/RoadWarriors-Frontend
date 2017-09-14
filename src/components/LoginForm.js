@@ -60,11 +60,6 @@ class LoginForm extends Component {
             />
           </CardSection>
 
-          <CardSection>
-            {this.state.errors.map((error) => {
-              return <Text key={error} style={styles.errorTextStyle}>{error}</Text>;
-            })}
-          </CardSection>
 
           <CardSection>
             <Button onPress={this.onButtonPress}>
@@ -84,6 +79,9 @@ class LoginForm extends Component {
             </Button>
           </CardSection>
 
+            {this.state.errors.map((error) => {
+              return <Text key={error} style={styles.errorTextStyle}>{error}</Text>;
+            })}
         </Card>
       </View>
     );
