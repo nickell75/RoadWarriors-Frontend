@@ -8,7 +8,11 @@ import {
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
+import restaurantImg from './imgs/restaurantgourmet.png';
+import gasImg from './imgs/gazstation.png';
 import Polyline from '@mapbox/polyline';
+import Config from 'react-native-config'
+
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -34,8 +38,9 @@ class ReactMaps extends Component {
       },
       destinationLoc: '',
       coords: [],
-      polylines: []
-
+      polylines: [],
+      yelpMarkers: [],
+      gasMarkers: []
     };
   }
 
@@ -57,8 +62,9 @@ class ReactMaps extends Component {
       this.setState({ markerPosition: initialRegion });
 
     },
-    (error) => alert(JSON.stringify(error)),
+     (error) => alert(JSON.stringify(error)),
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 });
+
 
     this.watchID = navigator.geolocation.watchPosition((position) => {
       let lat = parseFloat(position.coords.latitude);
@@ -73,7 +79,22 @@ class ReactMaps extends Component {
 
       this.setState({ initialPosition: lastRegion });
       this.setState({ markerPosition: lastRegion });
+
+      axios.all([
+        axios({ method: 'get', url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=8500`, headers: { 'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx' } }).catch(response => { console.log(response); }),
+        axios({ method: 'get', url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=37.78825,-122.4324&radius=8500&type=gas_station&key=AIzaSyCd4XV6oELQ949KGvp7-ODsqlyjgzQ4_KU` }).catch(response => { console.log(response); })
+        ])
+        .then(axios.spread((yelpData, gasData) => {
+          this.setState({
+            yelpMarkers: yelpData.data.businesses,
+            gasMarkers: gasData.data.results
+          });
+        }))
+        .catch(response =>
+          console.log(response)
+        );
     });
+
   }
 
   componentWillUnmount() {
@@ -90,7 +111,7 @@ class ReactMaps extends Component {
     const origin_latitude = this.state.markerPosition.latitude;
     const origin_longitude = this.state.markerPosition.longitude;
     const origin_position = `${origin_latitude},${origin_longitude}`;
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyDv46VRrktCpx1fCm3piqCSsMRajVCd6rk`;
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyBJMMXmTR274a36jfP2oxQ8VAr6zH8EdAw`;
 
     axios.post(url).then(response => {
       let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
