@@ -3,16 +3,15 @@ import {
   StyleSheet,
   View,
   Dimensions,
-  Text
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
-import { Button, Card, CardSection, Input } from './common';
 import axios from 'axios';
 import restaurantImg from './imgs/restaurantgourmet.png';
 import gasImg from './imgs/gazstation.png';
 import Polyline from '@mapbox/polyline';
-import Config from 'react-native-config'
 
+import { Button, CardSection, Input } from './common';
+import SearchBox from './SearchBox';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -36,6 +35,8 @@ class ReactMaps extends Component {
         latitude: 0,
         longitude: 0
       },
+      yelpMarkers: [],
+      gasMarkers: [],
       destinationLoc: '',
       coords: [],
       polylines: [],
@@ -60,7 +61,6 @@ class ReactMaps extends Component {
       };
       this.setState({ initialPosition: initialRegion });
       this.setState({ markerPosition: initialRegion });
-
     },
      (error) => alert(JSON.stringify(error)),
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 });
@@ -98,7 +98,7 @@ class ReactMaps extends Component {
   }
 
   componentWillUnmount() {
-    navigator.geolocation.clearWatch(this.watchID)
+    navigator.geolocation.clearWatch(this.watchID);
   }
 
   destinationParser(destination) {
@@ -155,9 +155,9 @@ class ReactMaps extends Component {
           showsUserLocation={true}
           followsUserLocation={true}
           showsMyLocationButton
-          showsTraffic
           zoomEnabled
-          scrollEnabled>
+          scrollEnabled
+        >
 
         <MapView.Marker
           coordinate={this.state.markerPosition}>
@@ -169,7 +169,34 @@ class ReactMaps extends Component {
         {this.state.polylines}
 
 
-        <Card>
+        {this.state.yelpMarkers.map((marker, index) => {
+            return (
+               <MapView.Marker
+                  key={index}
+                  image={restaurantImg}
+                  coordinate={{
+                     latitude: marker.coordinates.latitude,
+                     longitude: marker.coordinates.longitude,
+                  }}
+                />
+             );
+         })}
+
+        {this.state.gasMarkers.map((marker, index) => {
+          return (
+            <MapView.Marker
+              key={index}
+              image={gasImg}
+              coordinate={{
+                  latitude: marker.geometry.location.lat,
+                  longitude: marker.geometry.location.lng,
+              }}
+            />
+          );
+        })}
+      </MapView>
+
+      <SearchBox>
           <CardSection>
             <Input
               placeholder="Where to?"
@@ -177,14 +204,12 @@ class ReactMaps extends Component {
               onChangeText={destinationLoc => this.setState({ destinationLoc })}
             />
           </CardSection>
-
           <CardSection>
-            <Button onPress={this.getDirections.bind(this)}>
-              Fuck you Mark!!!
+            <Button onPress={() => this.getDirections.bind(this)}>
+              Go
             </Button>
           </CardSection>
-        </Card>
-      </MapView>
+        </SearchBox>
     </View>
     );
   }
