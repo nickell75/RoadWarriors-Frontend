@@ -22,8 +22,8 @@ class ReactMaps extends Component {
 
     this.state = {
       initialPosition: {
-        latitude: 0,
-        longitude: 0,
+        latitude: 37.784517,
+        longitude: -122.397194,
         latitudeDelta: 0,
         longitudeDelta: 0
       },
