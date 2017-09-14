@@ -6,10 +6,11 @@ import {
 } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
-import Polyline from '@mapbox/polyline';
-import { Button, CardSection, Input } from './common';
 import restaurantImg from './imgs/restaurantgourmet.png';
 import gasImg from './imgs/gazstation.png';
+import Polyline from '@mapbox/polyline';
+
+import { Button, CardSection, Input } from './common';
 import SearchBox from './SearchBox';
 
 const { width, height } = Dimensions.get('window');
@@ -18,6 +19,8 @@ const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 class ReactMaps extends Component {
+
+  // set state with initial values for initial position of user, the marker position
   constructor(props) {
     super(props);
 
@@ -35,7 +38,10 @@ class ReactMaps extends Component {
       yelpMarkers: [],
       gasMarkers: [],
       destinationLoc: '',
-      coords: []
+      coords: [],
+      polylines: [],
+      yelpMarkers: [],
+      gasMarkers: []
     };
   }
 
@@ -56,8 +62,9 @@ class ReactMaps extends Component {
       this.setState({ initialPosition: initialRegion });
       this.setState({ markerPosition: initialRegion });
     },
-    (error) => alert(JSON.stringify(error)),
+     (error) => alert(JSON.stringify(error)),
     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 });
+
 
     this.watchID = navigator.geolocation.watchPosition((position) => {
       let lat = parseFloat(position.coords.latitude);
@@ -87,6 +94,7 @@ class ReactMaps extends Component {
           console.log(response)
         );
     });
+
   }
 
   componentWillUnmount() {
@@ -98,28 +106,42 @@ class ReactMaps extends Component {
   }
 
   getDirections() {
+
     const {markerPosition, destinationLoc } = this.state;
-    const origin_latitude = this.state.markerPosition.latitude
-    const origin_longitude = this.state.markerPosition.longitude
+    const origin_latitude = this.state.markerPosition.latitude;
+    const origin_longitude = this.state.markerPosition.longitude;
     const origin_position = `${origin_latitude},${origin_longitude}`;
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyBEBRwbyIwxo23O6gXSQOnjAXmi8ahzxpU`
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyBJMMXmTR274a36jfP2oxQ8VAr6zH8EdAw`;
 
     axios.post(url).then(response => {
-      console.log(response);
-    let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
-    let coords = points.map((point) => {
-      return  {
-          latitude : point[0],
-          longitude : point[1]
-        }
+      let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
+      let coords = points.map((point) => {
+        return  {
+              latitude : point[0],
+              longitude : point[1]
+          }
       })
-    this.setState({coords: coords})
-        return coords
-      }).catch(error => {
-          alert(error)
-          return error
-        });
-}
+
+      let polyline = (
+      <MapView.Polyline
+            coordinates={coords}
+            strokeWidth={8}
+            strokeColor="blue"
+      />
+      );
+
+      this.setState((prevState) => {
+      return {
+        polylines: [...prevState.polylines, polyline]
+      }
+    });
+
+    return polyline;
+  }).catch(error => {
+      alert(error);
+    });
+
+ }
 
   render() {
     return (
@@ -144,11 +166,8 @@ class ReactMaps extends Component {
           </View>
         </MapView.Marker>
 
-        <MapView.Polyline
-            coordinates={this.state.coords}
-            strokeWidth={8}
-            strokeColor="blue"
-        />
+        {this.state.polylines}
+
 
         {this.state.yelpMarkers.map((marker, index) => {
             return (
@@ -217,5 +236,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 });
+
+
 
 export default ReactMaps;
