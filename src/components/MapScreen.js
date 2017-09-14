@@ -18,6 +18,8 @@ const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 class ReactMaps extends Component {
+
+  // set state with initial values for initial position of user, the marker position
   constructor(props) {
     super(props);
 
@@ -35,7 +37,9 @@ class ReactMaps extends Component {
       yelpMarkers: [],
       gasMarkers: [],
       destinationLoc: '',
-      coords: []
+      coords: [],
+      polylines: []
+
     };
   }
 
@@ -98,28 +102,42 @@ class ReactMaps extends Component {
   }
 
   getDirections() {
+
     const {markerPosition, destinationLoc } = this.state;
-    const origin_latitude = this.state.markerPosition.latitude
-    const origin_longitude = this.state.markerPosition.longitude
+    const origin_latitude = this.state.markerPosition.latitude;
+    const origin_longitude = this.state.markerPosition.longitude;
     const origin_position = `${origin_latitude},${origin_longitude}`;
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyBEBRwbyIwxo23O6gXSQOnjAXmi8ahzxpU`
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyDv46VRrktCpx1fCm3piqCSsMRajVCd6rk`;
 
     axios.post(url).then(response => {
-      console.log(response);
-    let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
-    let coords = points.map((point) => {
-      return  {
-          latitude : point[0],
-          longitude : point[1]
-        }
+      let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
+      let coords = points.map((point) => {
+        return  {
+              latitude : point[0],
+              longitude : point[1]
+          }
       })
-    this.setState({coords: coords})
-        return coords
-      }).catch(error => {
-          alert(error)
-          return error
-        });
-}
+
+      let polyline = (
+      <MapView.Polyline
+            coordinates={coords}
+            strokeWidth={8}
+            strokeColor="blue"
+      />
+      );
+
+      this.setState((prevState) => {
+      return {
+        polylines: [...prevState.polylines, polyline]
+      }
+    });
+
+    return polyline;
+  }).catch(error => {
+      alert(error);
+    });
+
+ }
 
   render() {
     return (
@@ -144,11 +162,8 @@ class ReactMaps extends Component {
           </View>
         </MapView.Marker>
 
-        <MapView.Polyline
-            coordinates={this.state.coords}
-            strokeWidth={8}
-            strokeColor="blue"
-        />
+        {this.state.polylines}
+
 
         {this.state.yelpMarkers.map((marker, index) => {
             return (
@@ -217,5 +232,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 });
+
+
 
 export default ReactMaps;
