@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 
-const Card = (props) => {
+const SearchBox = (props) => {
   return (
     <View style={styles.containerStyle}>
       {props.children}
@@ -24,7 +24,8 @@ const styles = {
     marginRight: 5,
     marginTop: 10,
     alignSelf: 'stretch',
+    top: -250
   }
 };
 
-export { Card };
+export default SearchBox;
