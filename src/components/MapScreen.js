@@ -35,8 +35,7 @@ class ReactMaps extends Component {
       yelpMarkers: [],
       gasMarkers: [],
       destinationLoc: '',
-      coords: [],
-      polylines: []
+      coords: []
     };
     this.getDirections = this.getDirections.bind(this);
   }
@@ -111,21 +110,14 @@ class ReactMaps extends Component {
         return  {
               latitude : point[0],
               longitude : point[1]
-          }
-      })
-      let polyline = (
-      <MapView.Polyline
-            coordinates={coords}
-            strokeWidth={8}
-            strokeColor="blue"
-      />
-      );
+          };
+      });
+
       this.setState(() => {
       return {
-        polylines: [polyline]
-      }
+        coords
+      };
       });
-      return polyline;
       }).catch(error => {
         alert(error);
       });
@@ -172,8 +164,6 @@ class ReactMaps extends Component {
                 />
              );
          })}
-
-        {this.state.polylines}
 
         {this.state.gasMarkers.map((marker, index) => {
           return (
