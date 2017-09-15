@@ -103,13 +103,13 @@ class ReactMaps extends Component {
     const origin_latitude = this.state.markerPosition.latitude;
     const origin_longitude = this.state.markerPosition.longitude;
     const origin_position = `${origin_latitude},${origin_longitude}`;
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyDv46VRrktCpx1fCm3piqCSsMRajVCd6rk`
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin_position}&destination=${this.destinationParser(destinationLoc)}&key=AIzaSyDv46VRrktCpx1fCm3piqCSsMRajVCd6rk`;
     axios.post(url).then(response => {
       let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
       let coords = points.map((point) => {
         return  {
-              latitude : point[0],
-              longitude : point[1]
+              latitude: point[0],
+              longitude: point[1]
           };
       });
 
