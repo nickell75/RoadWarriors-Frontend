@@ -35,8 +35,10 @@ class ReactMaps extends Component {
       yelpMarkers: [],
       gasMarkers: [],
       destinationLoc: '',
-      coords: []
+      coords: [],
+      polylines: []
     };
+    this.getDirections = this.getDirections.bind(this);
   }
 
   watchID: ?number = null
@@ -99,27 +101,35 @@ class ReactMaps extends Component {
 
   getDirections() {
     const {markerPosition, destinationLoc } = this.state;
-    const origin_latitude = this.state.markerPosition.latitude
-    const origin_longitude = this.state.markerPosition.longitude
+    const origin_latitude = this.state.markerPosition.latitude;
+    const origin_longitude = this.state.markerPosition.longitude;
     const origin_position = `${origin_latitude},${origin_longitude}`;
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyBEBRwbyIwxo23O6gXSQOnjAXmi8ahzxpU`
-
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyDv46VRrktCpx1fCm3piqCSsMRajVCd6rk`
     axios.post(url).then(response => {
-      console.log(response);
-    let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
-    let coords = points.map((point) => {
-      return  {
-          latitude : point[0],
-          longitude : point[1]
-        }
+      let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
+      let coords = points.map((point) => {
+        return  {
+              latitude : point[0],
+              longitude : point[1]
+          }
       })
-    this.setState({coords: coords})
-        return coords
+      let polyline = (
+      <MapView.Polyline
+            coordinates={coords}
+            strokeWidth={8}
+            strokeColor="blue"
+      />
+      );
+      this.setState(() => {
+      return {
+        polylines: [polyline]
+      }
+      });
+      return polyline;
       }).catch(error => {
-          alert(error)
-          return error
-        });
-}
+        alert(error);
+      });
+  }
 
   render() {
     return (
@@ -163,6 +173,8 @@ class ReactMaps extends Component {
              );
          })}
 
+        {this.state.polylines}
+
         {this.state.gasMarkers.map((marker, index) => {
           return (
             <MapView.Marker
@@ -186,7 +198,7 @@ class ReactMaps extends Component {
             />
           </CardSection>
           <CardSection>
-            <Button onPress={() => this.getDirections.bind(this)}>
+            <Button onPress={this.getDirections}>
               Go
             </Button>
           </CardSection>
