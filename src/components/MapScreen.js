@@ -189,8 +189,8 @@ class ReactMaps extends Component {
         })}
       </MapView>
 
-      <SearchBox>
-          <CardSection>
+      <SearchBox >
+          <CardSection >
             <Input
               placeholder="Where to?"
               value={this.state.destinationLoc}
@@ -198,7 +198,7 @@ class ReactMaps extends Component {
             />
           </CardSection>
           <CardSection>
-            <Button onPress={this.getDirections}>
+            <Button onPress={this.getDirections} >
               Go
             </Button>
           </CardSection>

@@ -24,7 +24,7 @@ const styles = {
     marginRight: 5,
     marginTop: 10,
     alignSelf: 'stretch',
-    top: -250
+    top: -250,
   }
 };
 
