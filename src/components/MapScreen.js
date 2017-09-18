@@ -87,7 +87,7 @@ class ReactMaps extends Component {
         }))
         .catch(response =>
           console.log(response)
-        );
+      );
     });
   }
 
