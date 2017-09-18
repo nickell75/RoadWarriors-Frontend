@@ -7,7 +7,9 @@ They say it's not about the destination. It's about the journey. Yet, can you re
 With the Road Warriors iOS app, you can reduce all those windows and apps to one. Get directions to your destination on the map, and as you travel, Road Warriors dynamically displays markers for gasoline stations and restaurants so you don't have to do that research.
 
 ![Markers](./images/RWimg1.png)
+
 ![Directions](./images/RWimg2.png)
+
 ![WholeView](./images/RWimg3.png)
 
 ## How It Works
