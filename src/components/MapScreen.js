@@ -189,20 +189,20 @@ class ReactMaps extends Component {
         })}
       </MapView>
 
-      <SearchBox >
-          <CardSection >
-            <Input
-              placeholder="Where to?"
-              value={this.state.destinationLoc}
-              onChangeText={destinationLoc => this.setState({ destinationLoc })}
-            />
-          </CardSection>
-          <CardSection>
-            <Button onPress={this.getDirections} >
-              Go
-            </Button>
-          </CardSection>
-        </SearchBox>
+      <SearchBox>
+        <CardSection>
+          <Input
+            placeholder="Where to?"
+            value={this.state.destinationLoc}
+            onChangeText={destinationLoc => this.setState({ destinationLoc })}
+          />
+        </CardSection>
+        <CardSection>
+          <Button onPress={this.getDirections}>
+            Go
+          </Button>
+        </CardSection>
+      </SearchBox>
     </View>
     );
   }
