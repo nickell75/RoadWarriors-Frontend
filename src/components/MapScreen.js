@@ -4,6 +4,8 @@ import {
   View,
   Dimensions,
 } from 'react-native';
+import Config from 'react-native-config';
+
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
 import Polyline from '@mapbox/polyline';
@@ -35,8 +37,7 @@ class ReactMaps extends Component {
       yelpMarkers: [],
       gasMarkers: [],
       destinationLoc: '',
-      coords: [],
-      polylines: []
+      coords: []
     };
     this.getDirections = this.getDirections.bind(this);
   }
@@ -76,8 +77,8 @@ class ReactMaps extends Component {
       this.setState({ markerPosition: lastRegion });
 
       axios.all([
-        axios({ method: 'get', url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=8500`, headers: { 'authorization': 'Bearer wtE8XDeiJULwkLUzO5z8_ZCGuMvnOMwVojZfWDTEXAAq5w5DqT7aF294pBuDY7SaKAjk7fSORTo0gjR4XiUhr2vBYJL4IPScLJffkvslOfuCp60CQbUTUEyzrv2xWXYx' } }).catch(response => { console.log(response); }),
-        axios({ method: 'get', url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=37.78825,-122.4324&radius=8500&type=gas_station&key=AIzaSyCd4XV6oELQ949KGvp7-ODsqlyjgzQ4_KU` }).catch(response => { console.log(response); })
+        axios({ method: 'get', url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=8500`, headers: { 'authorization': Config.YelpApi } }).catch(response => { console.log(response); }),
+        axios({ method: 'get', url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=37.78825,-122.4324&radius=8500&type=gas_station&key=${Config.GooglePlaces}` }).catch(response => { console.log(response); })
         ])
         .then(axios.spread((yelpData, gasData) => {
           this.setState({
@@ -104,28 +105,21 @@ class ReactMaps extends Component {
     const origin_latitude = this.state.markerPosition.latitude;
     const origin_longitude = this.state.markerPosition.longitude;
     const origin_position = `${origin_latitude},${origin_longitude}`;
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${ origin_position }&destination=${ this.destinationParser(destinationLoc)}&key=AIzaSyDv46VRrktCpx1fCm3piqCSsMRajVCd6rk`
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin_position}&destination=${this.destinationParser(destinationLoc)}&key=AIzaSyDv46VRrktCpx1fCm3piqCSsMRajVCd6rk`;
     axios.post(url).then(response => {
       let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
       let coords = points.map((point) => {
         return  {
-              latitude : point[0],
-              longitude : point[1]
-          }
-      })
-      let polyline = (
-      <MapView.Polyline
-            coordinates={coords}
-            strokeWidth={8}
-            strokeColor="blue"
-      />
-      );
+              latitude: point[0],
+              longitude: point[1]
+          };
+      });
+
       this.setState(() => {
       return {
-        polylines: [polyline]
-      }
+        coords
+      };
       });
-      return polyline;
       }).catch(error => {
         alert(error);
       });
@@ -173,17 +167,18 @@ class ReactMaps extends Component {
              );
          })}
 
-        {this.state.polylines}
-
         {this.state.gasMarkers.map((marker, index) => {
           return (
             <MapView.Marker
               key={index}
               image={gasImg}
+              prices={marker.price}
+              name={marker.name}
               coordinate={{
                   latitude: marker.geometry.location.lat,
                   longitude: marker.geometry.location.lng,
               }}
+              onPress={this.props.popUp}
             />
           );
         })}
