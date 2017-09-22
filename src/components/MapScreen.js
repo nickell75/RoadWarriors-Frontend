@@ -37,7 +37,7 @@ class ReactMaps extends Component {
       yelpMarkers: [],
       gasMarkers: [],
       destinationLoc: '',
-      coords: []
+      coords: [],
     };
     this.getDirections = this.getDirections.bind(this);
   }
@@ -76,6 +76,7 @@ class ReactMaps extends Component {
       this.setState({ initialPosition: lastRegion });
       this.setState({ markerPosition: lastRegion });
 
+
       axios.all([
         axios({ method: 'get', url: `https://api.yelp.com/v3/businesses/search?term=food&latitude=${this.state.markerPosition.latitude}&longitude=${this.state.markerPosition.longitude}&radius=8500`, headers: { 'authorization': Config.YelpApi } }).catch(response => { console.log(response); }),
         axios({ method: 'get', url: `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=37.78825,-122.4324&radius=8500&type=gas_station&key=${Config.GooglePlaces}` }).catch(response => { console.log(response); })
@@ -105,7 +106,7 @@ class ReactMaps extends Component {
     const origin_latitude = this.state.markerPosition.latitude;
     const origin_longitude = this.state.markerPosition.longitude;
     const origin_position = `${origin_latitude},${origin_longitude}`;
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin_position}&destination=${this.destinationParser(destinationLoc)}&key=AIzaSyDv46VRrktCpx1fCm3piqCSsMRajVCd6rk`;
+    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin_position}&destination=${this.destinationParser(destinationLoc)}&key=${Config.GoogleDirections}`;
     axios.post(url).then(response => {
       let points = Polyline.decode(response.data.routes[0].overview_polyline.points);
       let coords = points.map((point) => {
